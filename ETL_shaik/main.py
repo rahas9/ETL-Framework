@@ -1,170 +1,116 @@
-#
-"""
-=========================================================
-Project : Enterprise Metadata Driven ETL Framework
-File    : main.py
-Author  : Shaik Rahamat
-Purpose : Entry point for ETL Framework
-=========================================================
-"""
+import os
 
 from src.core.logger import Logger
 from src.core.config_reader import ConfigReader
-
-from src.authentication.auth import Authentication
-
-from src.api.api_client import APIClient
-from src.api.pagination import Pagination
-
-from src.processing.json_flattener import JSONFlattener
-from src.processing.mapping_engine import MappingEngine
-from src.processing.transformer import Transformer
-from src.processing.validation import Validator
-
-from src.loaders.s3_loader import S3Loader
+from src.services.etl_service import ETLService
 
 
 class ETLFramework:
 
-    def __init__(self, config_path):
+
+    def __init__(self, config_folder):
 
         self.logger = Logger().get_logger()
 
-        self.config_path = config_path
+        self.config_folder = config_folder
+
+
+
+    def get_config_files(self):
+
+        """
+        Dynamically read all JSON files
+        """
+
+        files = []
+
+        for file in os.listdir(self.config_folder):
+
+            if file.endswith(".json"):
+
+                files.append(
+                    os.path.join(
+                        self.config_folder,
+                        file
+                    )
+                )
+
+        return files
+
+
 
     def run(self):
 
         try:
 
-            self.logger.info("=" * 70)
-            self.logger.info("ETL Framework Started")
-            self.logger.info("=" * 70)
+            self.logger.info(
+                "ETL Framework Started"
+            )
 
-            ####################################################
-            # Read Metadata Configuration
-            ####################################################
 
-            config_reader = ConfigReader(self.config_path)
+            # Get all metadata json files
 
-            metadata = config_reader.read()
+            config_files = self.get_config_files()
 
-            ####################################################
-            # Loop Through Each Table
-            ####################################################
 
-            for table_config in metadata:
 
-                table = table_config["table"]
+            for config_file in config_files:
 
-                self.logger.info(f"Processing Table : {table}")
-
-                ####################################################
-                # Authentication
-                ####################################################
-
-                auth = Authentication(table_config)
-
-                token = auth.authenticate()
-
-                ####################################################
-                # API Client
-                ####################################################
-
-                api_client = APIClient(
-                    config=table_config,
-                    token=token
-                )
-
-                ####################################################
-                # Pagination
-                ####################################################
-
-                paginator = Pagination(
-                    api_client=api_client,
-                    config=table_config
-                )
-
-                json_response = paginator.fetch_all()
 
                 self.logger.info(
-                    f"Records Retrieved : {len(json_response)}"
+                    f"Processing Config : {config_file}"
                 )
 
-                ####################################################
-                # Flatten JSON
-                ####################################################
 
-                flattener = JSONFlattener()
+                # Read metadata
 
-                df = flattener.flatten(
-                    json_response,
-                    table_config
+                reader = ConfigReader(
+                    config_file
                 )
+
+
+                metadata = reader.read()
+
+
+
+                # Start ETL
+
+                etl = ETLService(
+                    metadata
+                )
+
+
+                etl.run()
+
+
 
                 self.logger.info(
-                    f"DataFrame Shape : {df.shape}"
+                    f"Completed : {config_file}"
                 )
 
-                ####################################################
-                # Mapping
-                ####################################################
 
-                mapper = MappingEngine(table_config)
 
-                df = mapper.apply(df)
+        except Exception as e:
 
-                ####################################################
-                # Transformation
-                ####################################################
+            self.logger.exception(e)
 
-                transformer = Transformer(table_config)
+            raise
 
-                df = transformer.transform(df)
-
-                ####################################################
-                # Validation
-                ####################################################
-
-                validator = Validator(table_config)
-
-                validator.validate(df)
-
-                ####################################################
-                # Load to Amazon S3
-                ####################################################
-
-                loader = S3Loader(table_config)
-
-                loader.write(df)
-
-                ####################################################
-                # Success Log
-                ####################################################
-
-                self.logger.info(
-                    f"{table} Loaded Successfully."
-                )
-
-                self.logger.info("-" * 70)
-
-            self.logger.info("=" * 70)
-            self.logger.info("ETL Completed Successfully")
-            self.logger.info("=" * 70)
-
-        except Exception as ex:
-
-            self.logger.exception(ex)
-
-            raise ex
 
 
 def main():
 
-    CONFIG_PATH = "config/cloudiq.json"
 
-    framework = ETLFramework(CONFIG_PATH)
+    CONFIG_FOLDER = "config"
+
+
+    framework = ETLFramework(
+        CONFIG_FOLDER
+    )
+
 
     framework.run()
+
 
 
 if __name__ == "__main__":
