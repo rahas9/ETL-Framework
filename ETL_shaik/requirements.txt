@@ -1,0 +1,45 @@
+# ================================
+# Enterprise Metadata ETL Framework
+# ================================
+
+# REST API
+requests==2.32.5
+
+# Data Processing
+pandas==2.3.1
+numpy==2.3.1
+
+# AWS S3
+boto3==1.39.9
+
+# Parquet Support
+pyarrow==21.0.0
+
+# Configuration Files
+PyYAML==6.0.2
+
+# Environment Variables
+python-dotenv==1.1.1
+
+# Database (Future Metadata DB Support)
+SQLAlchemy==2.0.41
+
+# Retry Framework
+tenacity==9.1.2
+
+# Logging (JSON Logs)
+python-json-logger==3.3.0
+
+# Date Utilities
+python-dateutil==2.9.0.post0
+
+# Unit Testing
+pytest==8.4.1
+pytest-cov==6.2.1
+
+# Code Quality
+flake8==7.3.0
+black==25.1.0
+
+# Type Checking
+mypy==1.17.0
