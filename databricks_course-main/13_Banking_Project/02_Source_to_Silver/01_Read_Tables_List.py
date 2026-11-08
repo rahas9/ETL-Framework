@@ -1,9 +1,17 @@
 # Databricks notebook source
+# /// script
+# [tool.databricks.environment]
+# environment_version = "6"
+# ///
+dbutils.widgets.text("source_system", "")
+
+# COMMAND ----------
+
 # ==========================================
 # 1️⃣ Create Widget
 # ==========================================
 
-dbutils.widgets.text("source_system", "")
+
 source_system = dbutils.widgets.get("source_system")
 
 print(f"Source System Passed: {source_system}")

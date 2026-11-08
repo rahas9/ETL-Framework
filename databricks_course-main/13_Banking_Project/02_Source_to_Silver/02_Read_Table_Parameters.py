@@ -1,10 +1,19 @@
 # Databricks notebook source
+# /// script
+# [tool.databricks.environment]
+# environment_version = "6"
+# ///
+default_metadata = ''
+dbutils.widgets.text("table_metadata", default_metadata)
+
+# COMMAND ----------
+
 # ==========================================
 # 1️⃣ Create Widget
 # ==========================================
 
 default_metadata = "{'table_id': '1', 'table_name': 'customers', 'source_system': 'sqlserver', 'source_schema': 'banking', 'source_table': 'customers', 'source_path': '', 'bronze_schema': 'bronze', 'silver_schema': 'silver', 'active_flag': 'True', 'load_order': '1', 'created_at': '2026-02-18 13:23:37.053711'}"
-dbutils.widgets.text("table_metadata", default_metadata)
+
 table_metadata_str = dbutils.widgets.get("table_metadata")
 
 print(f"Table Metadata Passed: {table_metadata_str}")

@@ -1,4 +1,8 @@
 # Databricks notebook source
+# /// script
+# [tool.databricks.environment]
+# environment_version = "6"
+# ///
 # =====================================================
 # 1️⃣ Widgets
 # =====================================================
@@ -14,7 +18,7 @@ dbutils.widgets.text(
     "'source_schema': 'banking', 'source_table': 'customers', "
     "'source_path': '', 'bronze_schema': 'bronze', "
     "'silver_schema': 'silver', 'active_flag': 'True', "
-    "'load_order': '1', 'created_at': '2026-02-18 13:23:37.053711'}"
+    "'load_order': '1', 'created_at': '2026-11-08 17:34:19.321005'}"
 )
 
 dbutils.widgets.text(
@@ -134,13 +138,15 @@ try:
 
         # 🔐 Read connection JSON from secret
         secret_json = dbutils.secrets.get(
-            scope="banking-scope",
-            key="sqlserver-connection-json"
+            scope="post_sql_scope2",
+            key="postgress_sql-connection-json"
         )
 
         config = json.loads(secret_json)
+        print(config)
 
-        jdbc_url = f"jdbc:sqlserver://{config['host']}:{config['port']};database={config['database']}"
+        #jdbc_url = f"jdbc:postgresql://{config['host']}:{config['port']};database={config['database']}"
+        jdbc_url = f"jdbc:postgresql://{config['host']}:{config['port']}/{config['database']}?sslmode=require"
 
         jdbc_properties = {
             "user": config["user"],
